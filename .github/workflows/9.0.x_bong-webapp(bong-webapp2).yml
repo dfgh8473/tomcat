@@ -1,0 +1,50 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy container app to Azure Web App - bong-webapp(bong-webapp2)
+
+on:
+  push:
+    branches:
+      - 9.0.x
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: 'ubuntu-latest'
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - uses: azure/docker-login@v1
+      with:
+        login-server: https://metanet.azurecr.io/
+        username: ${{ secrets.AzureAppService_ContainerUsername_c109c858bf8b4b2993f9086db94876bb }}
+        password: ${{ secrets.AzureAppService_ContainerPassword_1af2f03b10b54c308e45c9b16205a25b }}
+
+    - name: Build and push container image to registry
+      uses: docker/build-push-action@v2.2.1
+      with:
+        push: true
+        tags: tomcat:${{ github.sha }}
+        file: ./Dockerfile
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: 'bong-webapp2'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+    - name: Deploy to Azure Web App
+      id: deploy-to-webapp
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'bong-webapp'
+        slot-name: 'bong-webapp2'
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_349798a7448d4de5822f8d1f16cf03f4 }}
+        images: 'metanet.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_c109c858bf8b4b2993f9086db94876bb }}/tomcat:${{ github.sha }}'
