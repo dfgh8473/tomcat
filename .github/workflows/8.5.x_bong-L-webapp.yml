@@ -49,5 +49,5 @@ jobs:
       with:
         app-name: 'bong-L-webapp'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_0120b747de4f4c9299427b9d53283542 }}
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_35ab38a32c884144a9db890e26b5a830 }}
         package: '*.war'
